@@ -89,6 +89,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\MemberDAO.cs" />
+    <Compile Include="Models\LoginInput.cs" />
+    <Compile Include="Models\RegisterInput.cs" />
+    <Compile Include="Models\Response.cs" />
+    <Compile Include="Models\UpdatePasswordInput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -102,7 +107,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
     <Folder Include="Repository\" />
     <Folder Include="Services\" />
   </ItemGroup>
