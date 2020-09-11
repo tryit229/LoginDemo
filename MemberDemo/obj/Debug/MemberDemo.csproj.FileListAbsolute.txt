@@ -68,3 +68,7 @@ D:\Coding\MemberDemo\MemberDemo\obj\Debug\MemberDemo.csproj.CoreCompileInputs.ca
 D:\Coding\MemberDemo\MemberDemo\obj\Debug\MemberDemo.csproj.CopyComplete
 D:\Coding\MemberDemo\MemberDemo\obj\Debug\MemberDemo.dll
 D:\Coding\MemberDemo\MemberDemo\obj\Debug\MemberDemo.pdb
+D:\Coding\MemberDemo\MemberDemo\bin\Dapper.dll
+D:\Coding\MemberDemo\MemberDemo\bin\NLog.dll
+D:\Coding\MemberDemo\MemberDemo\bin\Dapper.xml
+D:\Coding\MemberDemo\MemberDemo\bin\NLog.xml
