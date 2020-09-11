@@ -31,12 +31,33 @@ namespace MemberDemo.Services
             return isExisted;
         }
 
+        public async Task<Response<bool>> Login(LoginInput input)
+        {
+            var authData = await _memberRepository.LoginData(input.Email);
+            if(authData.Data.Password == PasswordHash(input.Password, authData.Data.Salt))
+            {
+                return new Response<bool>()
+                {
+                    Success = true,
+                    Data = true,
+                    Message = "登入成功"
+                };
+            }
+            //TODO 同一Email 短時間嘗試超過次數　鎖定機制
+            return new Response<bool>()
+            {
+                Success = true,
+                Data = false,
+                Message = "登入失敗"
+            };
+        }
+
         public async Task<Response<bool>> Register(RegisterInput input)
         {
             var isExisted = await IsAccountExisted(input.Email);
             if (!isExisted.Success || isExisted.Data) return isExisted;
             var salt = GetRandomStringByGuid(5);
-            input.Password = CreateMD5(input.Password + salt);
+            input.Password = PasswordHash(input.Password, salt);
             return await _memberRepository.CreateAccount(input, salt);
         }
 
@@ -44,6 +65,11 @@ namespace MemberDemo.Services
         {
             var str = Guid.NewGuid().ToString().Replace("-", "");
             return str.Substring(0, length);
+        }
+
+        public static string PasswordHash(string pwd, string salt)
+        {
+            return CreateMD5(pwd + salt);
         }
 
         public static string CreateMD5(string input)

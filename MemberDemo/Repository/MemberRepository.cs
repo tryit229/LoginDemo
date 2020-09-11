@@ -35,7 +35,7 @@ namespace MemberDemo.Repository
                 {
                     var result = await cn.QueryAsync<string>
                         (@" SELECT [CreateTime]
-                          FROM [DEMO].[dbo].[Member] (NOLOCK)
+                          FROM [Member] (NOLOCK)
                           WHERE [Email]=@Email ", new { Email = email }
                          ).ConfigureAwait(continueOnCapturedContext: false);
 
@@ -99,7 +99,7 @@ namespace MemberDemo.Repository
             }
             catch (Exception e)
             {
-                _logger.Error($"InsertProduct:{e.Message}");
+                _logger.Error($"CreateAccount:{e.Message}");
                 return new Response<bool>()
                 {
                     Success = false,
@@ -108,7 +108,48 @@ namespace MemberDemo.Repository
             }
         }
 
+        public async Task<Response<MemberDAO>> LoginData(string email)
+        {
+            try
+            {
+                using (var cn = GetOpenConnection())
+                {
+                    var result = await cn.QueryAsync<MemberDAO>
+                        (@" SELECT [ID]
+                              ,[Email]
+                              ,[Password]
+                              ,[Salt]
+                              ,[Name]
+                              ,[Birthday]
+                              ,[AreaCode]
+                              ,[Mobile]
+                              ,[Country]
+                              ,[City]
+                              ,[District]
+                              ,[Address]
+                              ,[Status]
+                              ,[CreateTime]
+                        FROM [Member]", new { Email = email }
+                         ).ConfigureAwait(continueOnCapturedContext: false);
 
+                    return new Response<MemberDAO>()
+                    {
+                        Success = true,
+                        Data = result.FirstOrDefault()
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                var errStr = $"LoginData:{e.Message}";
+                _logger.Error(errStr);
+                return new Response<MemberDAO>()
+                {
+                    Success = false,
+                    Message = errStr
+                };
+            }
+        }
 
     }
 }

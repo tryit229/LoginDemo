@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace MemberDemo.Controllers
@@ -18,7 +19,7 @@ namespace MemberDemo.Controllers
 
         [HttpPost]
         [Route("api/Member/Register")]
-        public async System.Threading.Tasks.Task<Response<bool>> Register(RegisterInput input)
+        public async Task<Response<bool>> Register(RegisterInput input)
         {
             try
             {
@@ -40,9 +41,26 @@ namespace MemberDemo.Controllers
         }
 
         [HttpPost]
-        public Response<string> Login(LoginInput input)
+        [Route("api/Member/Login")]
+        public async Task<Response<bool>> Login(LoginInput input)
         {
-            throw new NotImplementedException();
+            try
+            {
+                ValidateHelper.Begin()
+                  .IsPasswordFomat(input.Password)
+                  .IsEmail(input.Email);
+                _memberSerevice = new MemberSerevice();
+                var result = await _memberSerevice.Login(input);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return new Response<bool>()
+                {
+                    Success = false,
+                    Message = e.Message,
+                };
+            }
         }
 
         [HttpPost]
