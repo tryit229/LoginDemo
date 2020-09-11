@@ -31,23 +31,24 @@ namespace MemberDemo.Services
             return isExisted;
         }
 
-        public async Task<Response<bool>> Login(LoginInput input)
+        public async Task<Response<string>> Login(LoginInput input)
         {
             var authData = await _memberRepository.LoginData(input.Email);
             if(authData.Data.Password == PasswordHash(input.Password, authData.Data.Salt))
             {
-                return new Response<bool>()
+                var token = Guid.NewGuid().ToString();
+                //TODO 存Token到Redis
+                return new Response<string>()
                 {
                     Success = true,
-                    Data = true,
+                    Data = token,
                     Message = "登入成功"
                 };
             }
             //TODO 同一Email 短時間嘗試超過次數　鎖定機制
-            return new Response<bool>()
+            return new Response<string>()
             {
                 Success = true,
-                Data = false,
                 Message = "登入失敗"
             };
         }

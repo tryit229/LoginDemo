@@ -42,7 +42,7 @@ namespace MemberDemo.Controllers
 
         [HttpPost]
         [Route("api/Member/Login")]
-        public async Task<Response<bool>> Login(LoginInput input)
+        public async Task<Response<string>> Login(LoginInput input)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace MemberDemo.Controllers
             }
             catch (Exception e)
             {
-                return new Response<bool>()
+                return new Response<string>()
                 {
                     Success = false,
                     Message = e.Message,
