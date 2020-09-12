@@ -120,6 +120,34 @@ namespace MemberDemo.Helper
             };
         }
 
+        public static async Task<Response<bool>> KeyExistInRedisAsync(string redisEndPoints, string key)
+        {
+            var msg = string.Empty;
+            try
+            {
+                var database = GetRedisDatabase(redisEndPoints);
+                if (database != null)
+                {
+                    return new Response<bool>()
+                    {
+                        Success = true,
+                        Data = await database.KeyExistsAsync(key, CommandFlags.PreferSlave)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                msg = $"KeyExistInRedisAsync: key={key} | {ex.Message}";
+                _logger.Error(msg);
+
+            }
+            return new Response<bool>()
+            {
+                Success = false,
+                Message = String.IsNullOrEmpty(msg) ? $"Can't get Redis DB {redisEndPoints}" : msg
+            };
+        }
+
         public sealed class RedisConnection
         {
             private static Lazy<RedisConnection> lazy = new Lazy<RedisConnection>(() =>

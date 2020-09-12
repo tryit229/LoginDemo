@@ -14,10 +14,12 @@ namespace MemberDemo.Services
     public class MemberSerevice
     {
         private MemberRepository _memberRepository;
+        private string _RedisSetting;
 
         public MemberSerevice()
         {
             _memberRepository = new MemberRepository();
+            _RedisSetting = ConfigurationManager.AppSettings["RedisSetting"];
         }
 
         public async Task<Response<bool>> IsAccountExisted(string email) 
@@ -56,15 +58,27 @@ namespace MemberDemo.Services
             if(authData.Data.Password == PasswordHash(input.Password, authData.Data.Salt))
             {
                 var token = Guid.NewGuid().ToString();
-                //TODO 存Token到Redis LoginToken 3HR
-                return new Response<string>()
-                {
-                    Success = true,
-                    Data = token,
-                    Message = "登入成功"
-                };
+                var settokenRes = await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.LoginToken}{token}", authData.Data.ID, 180);
+                if (settokenRes.Success)
+                    return new Response<string>()
+                    {
+                        Success = true,
+                        Data = token,
+                        Message = "登入成功"
+                    };
             }
-            //TODO 同一Email 短時間嘗試超過次數　鎖定機制
+
+            //同一Email 短時間嘗試超過次數　鎖定機制
+            var getLoginCountRes = await RedisHelper.GetKeyValueFromRedis(_RedisSetting, $"{RedisPath.EmailList}{input.Email}");
+            if (getLoginCountRes.Success)
+            {
+                await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.EmailList}{input.Email}", (Convert.ToInt32(getLoginCountRes.Data)+1).ToString(), 180);
+            }
+            else
+            {
+                await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.EmailList}{input.Email}", "0", 180);
+            }
+
             return new Response<string>()
             {
                 Success = true,
@@ -110,7 +124,7 @@ namespace MemberDemo.Services
         {
             var accountIDTask = await GetAccountID(email); //選用ID當Key的原因: 1. ID是資料庫的PK　2. 不希望太容易被識別出來
             if(accountIDTask.Success && !string.IsNullOrEmpty(accountIDTask.Data))
-                return await RedisHelper.SetKeyValueToRedis(ConfigurationManager.AppSettings["RedisSetting"], $"{RedisPath.ForgetPassword}{token}", accountIDTask.Data, 5);
+                return await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.ForgetPassword}{token}", accountIDTask.Data, 5);
             return new Response<bool>()
             {
                 Success = false,
@@ -126,10 +140,8 @@ namespace MemberDemo.Services
 
         public async Task<Response<bool>> UpdatePassword(UpdatePasswordInput input)
         {
-            //TODO 確認 ResetPasswordToken
-            //TODO 更新密碼、寫LOG
-            //var accountIDTask = await GetAccountID(input.Email);    //TODO OR Token Get AccountID
-            var accountIDTask = await RedisHelper.GetKeyValueFromRedis(ConfigurationManager.AppSettings["RedisSetting"], $"{RedisPath.ForgetPassword}{input.Token}");
+            //TODO 寫LOG
+            var accountIDTask = await RedisHelper.GetKeyValueFromRedis(_RedisSetting, $"{RedisPath.ForgetPassword}{input.Token}");
             if (!accountIDTask.Success || string.IsNullOrEmpty(accountIDTask.Data))
             {
                 return new Response<bool>()
@@ -141,7 +153,7 @@ namespace MemberDemo.Services
             var salt = GetRandomStringByGuid(5);
             input.Password = PasswordHash(input.Password, salt);
             var updatePasswordTask = _memberRepository.UpdatePassword(accountIDTask.Data, input.Password , salt);
-            var deleteForgetPwdTokenTask = RedisHelper.DeleteFromRedis(ConfigurationManager.AppSettings["RedisSetting"], $"{RedisPath.ForgetPassword}{input.Token}");
+            var deleteForgetPwdTokenTask = RedisHelper.DeleteFromRedis(_RedisSetting, $"{RedisPath.ForgetPassword}{input.Token}");
             await Task.WhenAll(updatePasswordTask, deleteForgetPwdTokenTask);
             if (updatePasswordTask.Result.Success && deleteForgetPwdTokenTask.Result.Success)
             {

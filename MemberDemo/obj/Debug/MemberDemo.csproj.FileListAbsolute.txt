@@ -93,3 +93,4 @@ D:\Coding\MemberDemo\MemberDemo\bin\System.Numerics.Vectors.xml
 D:\Coding\MemberDemo\MemberDemo\bin\System.Runtime.CompilerServices.Unsafe.xml
 D:\Coding\MemberDemo\MemberDemo\bin\System.Threading.Channels.xml
 D:\Coding\MemberDemo\MemberDemo\bin\System.Threading.Tasks.Extensions.xml
+D:\Coding\MemberDemo\MemberDemo\obj\Debug\MemberDemo.csprojAssemblyReference.cache
