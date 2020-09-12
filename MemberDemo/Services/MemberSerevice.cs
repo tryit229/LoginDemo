@@ -54,6 +54,16 @@ namespace MemberDemo.Services
 
         public async Task<Response<string>> Login(LoginInput input)
         {
+            Response<bool> checkBlock = await RedisHelper.KeyExistInRedisAsync(_RedisSetting, $"{RedisPath.LoginBlock}{input.Email}");
+            if (checkBlock.Data)
+            {
+                return new Response<string>()
+                {
+                    Success = false,
+                    Message = "帳號鎖定30分鐘"
+                };
+            }
+
             var authData = await _memberRepository.LoginData(input.Email);
             if(authData.Data.Password == PasswordHash(input.Password, authData.Data.Salt))
             {
@@ -73,6 +83,10 @@ namespace MemberDemo.Services
             if (getLoginCountRes.Success)
             {
                 await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.EmailList}{input.Email}", (Convert.ToInt32(getLoginCountRes.Data)+1).ToString(), 180);
+                if (Convert.ToInt32(getLoginCountRes.Data) + 1 > 15)
+                {
+                    await RedisHelper.SetKeyValueToRedis(_RedisSetting, $"{RedisPath.LoginBlock}{input.Email}", "", 30);
+                }
             }
             else
             {

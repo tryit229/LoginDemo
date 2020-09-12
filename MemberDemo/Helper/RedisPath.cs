@@ -10,5 +10,6 @@ namespace MemberDemo.Helper
         public readonly static string ForgetPassword = "urn:RestPasswordToken:";
         public readonly static string EmailList = "urn:EmailList:";
         public readonly static string LoginToken = "urn:LoginToken:";
+        public readonly static string LoginBlock = "urn:LoginBlock:";
     }
 }
