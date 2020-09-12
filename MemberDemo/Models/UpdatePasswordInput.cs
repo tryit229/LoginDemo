@@ -7,15 +7,15 @@ namespace MemberDemo.Models
 {
     public class UpdatePasswordInput
     {
-        public UpdatePasswordAction Action { get; set; }
-        public string Email { get; set; }
+        //public UpdatePasswordAction Action { get; set; }
+        public string Token { get; set; }
         public string Password { get; set; }
     }
 
-    public enum UpdatePasswordAction
-    {
-        Unknown,
-        MemberCenter,   //用戶從前台修改密碼
-        ForgetPassword  //忘記密碼
-    }
+    //public enum UpdatePasswordAction
+    //{
+    //    Unknown,
+    //    MemberCenter,   //用戶從前台修改密碼
+    //    ForgetPassword  //忘記密碼
+    //}
 }

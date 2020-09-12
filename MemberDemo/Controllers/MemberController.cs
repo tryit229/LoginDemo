@@ -64,26 +64,35 @@ namespace MemberDemo.Controllers
         }
 
         [HttpPost]
-        public Response<string> ForgetPassword(string email)
+        [Route("api/Member/ForgetPassword")]
+        public async Task<Response<bool>> ForgetPassword(AccountInput input)
         {
-            throw new NotImplementedException();
+            ValidateHelper.Begin()
+              .IsEmail(input.Email);
+            _memberSerevice = new MemberSerevice();
+            return await _memberSerevice.ForgetPassword(input.Email);
         }
 
-        //[HttpPost]
-        //public Response<string> UpdatePassword(UpdatePasswordInput input)
-        //{
-        //    //確保資訊安全傳輸有幾種方式
-        //    // 1. 以網路層擋，僅限定特定IP讀取
-        //    // 2. 透過token協定
-        //    throw new NotImplementedException();
-        //}
+        [HttpPost]
+        [Route("api/Member/UpdatePassword")]
+        public async Task<Response<bool>> UpdatePassword(UpdatePasswordInput input)
+        {
+            //確保資訊安全傳輸有幾種方式
+            // 1. 以網路層擋，僅限定特定IP讀取
+            // 2. 透過token協定
+            ValidateHelper.Begin()
+                .IsPasswordFomat(input.Password)
+                .NotNull(input.Token);
+            _memberSerevice = new MemberSerevice();
+            return await _memberSerevice.UpdatePassword(input);
+        }
 
-        [HttpGet]
-        [Route("api/Member/IsAccountExisted/{email}")]
-        public Response<bool> IsAccountExisted(string email)
+        [HttpPost]
+        [Route("api/Member/IsAccountExisted/")]
+        public async Task<Response<bool>> IsAccountExistedAsync(AccountInput input)
         {
             _memberSerevice = new MemberSerevice();
-            return _memberSerevice.IsAccountExisted(email).GetAwaiter().GetResult();
+            return await _memberSerevice.IsAccountExisted(input.Email);
         }
 
         [HttpGet]

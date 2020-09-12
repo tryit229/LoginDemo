@@ -27,21 +27,21 @@ namespace MemberDemo.Repository
             return new SqlConnection(this._connectionString);
         }
 
-        public async Task<Response<bool>> IsEmailExist(string email)
+        public async Task<Response<string>> GetAccountIDByEmail(string email)
         {
             try
             {
                 using (var cn = GetOpenConnection())
                 {
                     var result = await cn.QueryAsync<string>
-                        (@" SELECT [CreateTime]
+                        (@" SELECT [ID]
                           FROM [Member] (NOLOCK)
                           WHERE [Email]=@Email ", new { Email = email }
                          ).ConfigureAwait(continueOnCapturedContext: false);
 
-                    return new Response<bool>(){
+                    return new Response<string>(){
                         Success = true,
-                        Data = result.Any()
+                        Data = result.FirstOrDefault()
                     };
                 }
             }
@@ -49,7 +49,7 @@ namespace MemberDemo.Repository
             {
                 var errStr = $"IsEmailExist:{e.Message}";
                 _logger.Error(errStr);
-                return new Response<bool>()
+                return new Response<string>()
                 {
                     Success = false,
                     Message = errStr
@@ -100,6 +100,35 @@ namespace MemberDemo.Repository
             catch (Exception e)
             {
                 _logger.Error($"CreateAccount:{e.Message}");
+                return new Response<bool>()
+                {
+                    Success = false,
+                    Message = e.Message
+                };
+            }
+        }
+
+        public async Task<Response<bool>> UpdatePassword(string id , string password, string salt)
+        {
+            try
+            {
+                using (var cn = GetOpenConnection())
+                {
+                    var result = await cn.ExecuteAsync(
+                        @"UPDATE [Member] SET [Password]=@Password, [Salt] = @Salt WHERE [ID] = @ID",
+                        new { Password = password, ID = id, Salt = salt }
+                         ).ConfigureAwait(continueOnCapturedContext: false);
+
+                    return new Response<bool>()
+                    {
+                        Success = result > 0,
+                        Data = result>0
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"UpdatePassword:{e.Message}");
                 return new Response<bool>()
                 {
                     Success = false,

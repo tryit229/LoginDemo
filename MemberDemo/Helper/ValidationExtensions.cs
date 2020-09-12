@@ -20,19 +20,14 @@ namespace MemberDemo.Helper
             }
         }
 
-        //public static Validation Check(this Validation validation, Func<bool> filterMethod)
-        //{
-        //    return Check<Exception>(validation, filterMethod, new Exception("Parameter InValid!"));
-        //}
-
-        //public static Validation NotNull(this Validation validation, Object obj)
-        //{
-        //    return Check<ArgumentNullException>(
-        //        validation,
-        //        () => obj != null,
-        //        new ArgumentNullException(string.Format("Parameter {0} can't be null", obj))
-        //    );
-        //}
+        public static Validation NotNull(this Validation validation, Object obj)
+        {
+            return Check<ArgumentNullException>(
+                validation,
+                () => obj != null,
+                new ArgumentNullException(string.Format("Parameter {0} can't be null", obj))
+            );
+        }
 
 
         public static Validation IsEmail(this Validation validation, string email)
